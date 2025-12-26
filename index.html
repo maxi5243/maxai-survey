@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MAX AI 員工畫像問卷</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root{--gold:#C9A962;--gold-light:#E8D5A3;--gold-dark:#A68B4B;--black:#1A1A1A;--black-light:#2D2D2D;--black-lighter:#3D3D3D;--white:#FFF;--gray:#888;--gray-light:#AAA}
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Noto Sans TC',sans-serif;background:var(--black);color:var(--white);min-height:100vh;line-height:1.6}
+        body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 20% 0%,rgba(201,169,98,.08) 0%,transparent 50%),radial-gradient(ellipse at 80% 100%,rgba(201,169,98,.05) 0%,transparent 50%);pointer-events:none;z-index:-1}
+        .header{position:fixed;top:0;left:0;right:0;height:70px;background:rgba(26,26,26,.98);backdrop-filter:blur(20px);display:flex;align-items:center;justify-content:space-between;padding:0 30px;z-index:1000;border-bottom:1px solid rgba(201,169,98,.3)}
+        .logo-container{display:flex;align-items:center;gap:15px}
+        .logo-container img:first-child{height:40px;width:auto}
+        .logo-container img:last-child{height:18px;width:auto}
+        .progress-info{font-size:14px;color:var(--gray-light)}
+        .progress-info span{color:var(--gold);font-weight:700}
+        .progress-container{position:fixed;top:70px;left:0;right:0;height:4px;background:var(--black-lighter);z-index:999}
+        .progress-bar{height:100%;background:linear-gradient(90deg,var(--gold-dark),var(--gold),var(--gold-light));width:0;transition:width .4s;box-shadow:0 0 10px rgba(201,169,98,.5)}
+        .main-content{padding:100px 20px 40px;max-width:800px;margin:0 auto}
+        .welcome-screen{text-align:center;padding:60px 20px;animation:fadeIn .6s}
+        .welcome-logo{margin-bottom:40px;display:flex;justify-content:center}
+        .welcome-logo-icon{height:160px;width:auto;filter:drop-shadow(0 0 40px rgba(201,169,98,0.3))}
+        .welcome-screen h1{font-family:'Orbitron',sans-serif;font-size:28px;color:var(--gold);margin-bottom:20px;letter-spacing:2px}
+        .welcome-screen p{font-size:16px;color:var(--gray-light);margin-bottom:15px}
+        .highlight{color:var(--gold)}
+        .welcome-info{background:var(--black-light);border:1px solid rgba(201,169,98,.2);border-radius:12px;padding:30px;margin:40px auto;max-width:500px;text-align:left}
+        .welcome-info h3{color:var(--gold);margin-bottom:15px;font-size:16px}
+        .welcome-info ul{list-style:none;color:var(--gray-light);font-size:14px}
+        .welcome-info li{padding:8px 0 8px 25px;position:relative}
+        .welcome-info li::before{content:'✓';position:absolute;left:0;color:var(--gold)}
+        .start-btn{background:linear-gradient(135deg,var(--gold-dark),var(--gold));color:var(--black);border:none;padding:16px 50px;font-size:16px;font-weight:700;border-radius:8px;cursor:pointer;transition:all .3s;margin-top:20px}
+        .start-btn:hover{transform:translateY(-2px);box-shadow:0 10px 30px rgba(201,169,98,.3)}
+        .section{display:none;animation:slideIn .4s}
+        .section.active{display:block}
+        @keyframes slideIn{from{opacity:0;transform:translateX(30px)}to{opacity:1;transform:translateX(0)}}
+        @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+        .section-header{margin-bottom:30px}
+        .section-number{font-family:'Orbitron',sans-serif;font-size:12px;color:var(--gold);letter-spacing:3px;margin-bottom:8px}
+        .section-title{font-size:24px;font-weight:700;margin-bottom:8px}
+        .section-desc{font-size:14px;color:var(--gray)}
+        .question{background:var(--black-light);border:1px solid rgba(201,169,98,.15);border-radius:12px;padding:25px;margin-bottom:20px;transition:all .3s}
+        .question:hover{border-color:rgba(201,169,98,.3)}
+        .question.answered{border-color:rgba(201,169,98,.5)}
+        .question-label{font-size:15px;font-weight:500;margin-bottom:15px;display:flex;align-items:flex-start;gap:10px}
+        .question-num{color:var(--gold);font-weight:700;font-size:13px;min-width:35px}
+        .required{color:var(--gold);margin-left:4px}
+        .options{display:flex;flex-direction:column;gap:10px}
+        .option{display:flex;align-items:center;padding:12px 16px;background:var(--black);border:1px solid var(--black-lighter);border-radius:8px;cursor:pointer;transition:all .2s}
+        .option:hover{border-color:var(--gold-dark);background:rgba(201,169,98,.05)}
+        .option.selected{border-color:var(--gold);background:rgba(201,169,98,.1)}
+        .option-radio{width:18px;height:18px;border:2px solid var(--gray);border-radius:50%;margin-right:12px;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0}
+        .option.selected .option-radio{border-color:var(--gold)}
+        .option.selected .option-radio::after{content:'';width:10px;height:10px;background:var(--gold);border-radius:50%}
+        .option-checkbox{width:18px;height:18px;border:2px solid var(--gray);border-radius:4px;margin-right:12px;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0}
+        .option.selected .option-checkbox{border-color:var(--gold);background:var(--gold)}
+        .option.selected .option-checkbox::after{content:'✓';color:var(--black);font-size:12px;font-weight:700}
+        .option-text{font-size:14px;color:var(--gray-light);transition:color .2s}
+        .option.selected .option-text{color:var(--white)}
+        .text-input{width:100%;padding:12px 16px;background:var(--black);border:1px solid var(--black-lighter);border-radius:8px;color:var(--white);font-size:14px;font-family:inherit;transition:all .2s}
+        .text-input:focus{outline:none;border-color:var(--gold)}
+        .text-input::placeholder{color:var(--gray)}
+        .options-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+        @media(max-width:600px){.options-grid{grid-template-columns:1fr}}
+        .nav-buttons{display:flex;justify-content:space-between;margin-top:40px;padding-top:30px;border-top:1px solid rgba(201,169,98,.1)}
+        .nav-btn{padding:14px 30px;font-size:14px;font-weight:600;border-radius:8px;cursor:pointer;transition:all .3s;font-family:inherit}
+        .nav-btn.prev{background:transparent;border:1px solid var(--gray);color:var(--gray-light)}
+        .nav-btn.prev:hover{border-color:var(--gold);color:var(--gold)}
+        .nav-btn.next{background:linear-gradient(135deg,var(--gold-dark),var(--gold));border:none;color:var(--black);font-weight:700}
+        .nav-btn.next:hover{transform:translateY(-2px);box-shadow:0 8px 25px rgba(201,169,98,.3)}
+        .completion-screen{text-align:center;padding:60px 20px}
+        .completion-icon{width:100px;height:100px;background:linear-gradient(135deg,var(--gold-dark),var(--gold));border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 30px;font-size:50px}
+        .completion-screen h2{font-family:'Orbitron',sans-serif;font-size:28px;color:var(--gold);margin-bottom:15px}
+        .result-box{background:var(--black-light);border:1px solid rgba(201,169,98,.3);border-radius:12px;padding:20px;margin:30px 0;text-align:left;max-height:300px;overflow-y:auto}
+        .result-box pre{font-family:monospace;font-size:11px;color:var(--gray-light);white-space:pre-wrap;word-break:break-all}
+        .copy-btn{background:var(--black-lighter);border:1px solid var(--gold);color:var(--gold);padding:12px 30px;font-size:14px;border-radius:8px;cursor:pointer;transition:all .3s}
+        .copy-btn:hover{background:var(--gold);color:var(--black)}
+        .loading{display:none;text-align:center;padding:60px 40px}
+        .loading.show{display:block}
+        .spinner{width:50px;height:50px;border:3px solid var(--black-lighter);border-top-color:var(--gold);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 20px}
+        @keyframes spin{to{transform:rotate(360deg)}}
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="logo-container">
+            <img src="logo-icon.png" alt="MAX AI" style="height:45px;width:auto;">
+        </div>
+        <div class="progress-info"><span id="currentSection">0</span> / <span id="totalSections">10</span></div>
+    </header>
+    <div class="progress-container"><div class="progress-bar" id="progressBar"></div></div>
+    <main class="main-content">
+        <!-- Welcome -->
+        <div class="welcome-screen" id="welcomeScreen">
+            <div class="welcome-logo">
+                <img src="logo-icon.png" alt="MAX AI" class="welcome-logo-icon">
+            </div>
+            <h1>員工畫像問卷</h1>
+            <p>歡迎加入 <span class="highlight">MAX AI</span>！</p>
+            <p>這份問卷將幫助 AI 總監和人類同事更好地認識你、配合你。</p>
+            <div class="welcome-info">
+                <h3>📋 填寫須知</h3>
+                <ul>
+                    <li>預計完成時間：10-15 分鐘</li>
+                    <li>全部為選擇題，輕鬆填寫</li>
+                    <li>沒有對錯之分，請如實作答</li>
+                    <li>資料僅限內部團隊協作使用</li>
+                </ul>
+            </div>
+            <button class="start-btn" onclick="startSurvey()">開始填寫</button>
+        </div>
+        <!-- Section 1: 基本信息 -->
+        <div class="section" id="section1">
+            <div class="section-header">
+                <div class="section-number">PART 01</div>
+                <h2 class="section-title">基本信息</h2>
+                <p class="section-desc">讓我們先認識你</p>
+            </div>
+            <div class="question">
+                <div class="question-label"><span class="question-num">Q1</span><span>你的姓名<span class="required">*</span></span></div>
+                <input type="text" class="text-input" placeholder="請輸入中文名或英文名" data-field="name">
+            </div>
+            <div class="question">
+                <div class="question-label"><span class="question-num">Q2</span><span>性別</span></div>
+                <div class="options">
+                    <label class="option" onclick="sel(this,'gender','男')"><div class="option-radio"></div><span class="option-text">男</span></label>
+                    <label class="option" onclick="sel(this,'gender','女')"><div class="option-radio"></div><span class="option-text">女</span></label>
+                    <label class="option" onclick="sel(this,'gender','其他')"><div class="option-radio"></div><span class="option-text">其他/不願透露</span></label>
+                </div>
+            </div>
+            <div class="question">
+                <div class="question-label"><span class="question-num">Q3</span><span>年齡段<span class="required">*</span></span></div>
+                <div class="options-grid">
+                    <label class="option" onclick="sel(this,'age','18-22歲')"><div class="option-radio"></div><span class="option-text">18-22歲</span></label>
+                    <label class="option" onclick="sel(this,'age','23-27歲')"><div class="option-radio"></div><span class="option-text">23-27歲</span></label>
+                    <label class="option" onclick="sel(this,'age','28-32歲')"><div class="option-radio"></div><span class="option-text">28-32歲</span></label>
+                    <label class="option" onclick="sel(this,'age','33-37歲')"><div class="option-radio"></div><span class="option-text">33-37歲</span></label>
+                    <label class="option" onclick="sel(this,'age','38-45歲')"><div class="option-radio"></div><span class="option-text">38-45歲</span></label>
+                    <label class="option" onclick="sel(this,'age','45歲以上')"><div class="option-radio"></div><span class="option-text">45歲以上</span></label>
+                </div>
+            </div>
+            <div class="question">
+                <div class="question-label"><span class="question-num">Q4</span><span>所在城市<span class="required">*</span></span></div>
+                <div class="options-grid">
+                    <label class="option" onclick="sel(this,'city','澳門')"><div class="option-radio"></div><span class="option-text">澳門</span></label>
+                    <label class="option" onclick="sel(this,'city','珠海/橫琴')"><div class="option-radio"></div><span class="option-text">珠海/橫琴</span></label>
+                    <label class="option" onclick="sel(this,'city','香港')"><div class="option-radio"></div><span class="option-text">香港</span></label>
+                    <label class="option" onclick="sel(this,'city','深圳')"><div class="option-radio"></div><span class="option-text">深圳</span></label>
+                    <label class="option" onclick="sel(this,'city','廣州')"><div class="option-radio"></div><span class="option-text">廣州</span></label>
+                    <label class="option" onclick="sel(this,'city','其他')"><div class="option-radio"></div><span class="option-text">其他</span></label>
+                </div>
+            </div>
+            <div class="question">
+                <div class="question-label"><span class="question-num">Q5</span><span>職位/角色<span class="required">*</span></span></div>
+                <div class="options-grid">
+                    <label class="option" onclick="sel(this,'position','技術開發')"><div class="option-radio"></div><span class="option-text">技術開發</span></label>
+                    <label class="option" onclick="sel(this,'position','產品設計')"><div class="option-radio"></div><span class="option-text">產品設計</span></label>
+                    <label class="option" onclick="sel(this,'position','銷售/商務')"><div class="option-radio"></div><span class="option-text">銷售/商務</span></label>
+                    <label class="option" onclick="sel(this,'position','市場/品牌')"><div class="option-radio"></div><span class="option-text">市場/品牌</span></label>
+                    <label class="option" onclick="sel(this,'position','運營/客服')"><div class="option-radio"></div><span class="option-text">運營/客服</span></label>
+                    <label class="option" onclick="sel(this,'position','管理層')"><div class="option-radio"></div><span class="option-text">管理層</span></label>
+                    <label class="option" onclick="sel(this,'position','實習生')"><div class="option-radio"></div><span class="option-text">實習生</span></label>
+                    <label class="option" onclick="sel(this,'position','其他')"><div class="option-radio"></div><span class="option-text">其他</span></label>
+                </div>
+            </div>
+            <div class="nav-buttons">
+                <div></div>
+                <button class="nav-btn next" onclick="nextSection()">下一步 →</button>
+            </div>
+        </div>
+
+        <!-- Section 2: 教育背景 -->
+        <div class="section" id="section2">
+            <div class="section-header">
+                <div class="section-number">PART 02</div>
+                <h2 class="section-title">教育與專業背景</h2>
+                <p class="section-desc">你的學習經歷和專業領域</p>
+            </div>
+            <div class="question">
+                <div class="question-label"><span class="question-num">Q6</span><span>最高學歷</span></div>
+                <div class="options-grid">
+                    <label class="option" onclick="sel(this,'education','高中/中專')"><div class="option-radio"></div><span class="option-text">高中/中專</span></label>
+                    <label class="option" onclick="sel(this,'education','大專')"><div class="option-radio"></div><span class="option-text">大專</span></label>
+                    <label class="option" onclick="sel(this,'education','本科')"><div class="option-radio"></div><span class="option-text">本科</span></label>
+                    <label class="option" onclick="sel(this,'education','碩士')"><div class="option-radio"></div><span class="option-text">碩士</span></label>
+                    <label class="option" onclick="sel(this,'education','博士')"><div class="option-radio"></div><span class="option-text">博士</span></label>
+                </div>
+            </div>
+            <div class="question">
+                <div class="question-label"><span class="question-num">Q7</span><span>專業領域（可多選）</span></div>
+                <div class="options-grid">
+                    <label class="option" onclick="mul(this,'major','計算機/軟件')"><div class="option-checkbox"></div><span class="option-text">計算機/軟件</span></label>
+                    <label class="option" onclick="mul(this,'major','數據/AI')"><div class="option-checkbox"></div><span class="option-text">數據/AI</span></label>
+                    <label class="option" onclick="mul(this,'major','設計/藝術')"><div class="option-checkbox"></div><span class="option-text">設計/藝術</span></label>
+                    <label class="option" onclick="mul(this,'major','商科/管理')"><div class="option-checkbox"></div><span class="option-text">商科/管理</span></label>
+                    <label class="option" onclick="mul(this,'major','市場營銷')"><div class="option-checkbox"></div><span class="option-text">市場營銷</span></label>
+                    <label class="option" onclick="mul(this,'major','金融/會計')"><div class="option-checkbox"></div><span class="option-text">金融/會計</span></label>
+                    <label class="option" onclick="mul(this,'major','語言/翻譯')"><div class="option-checkbox"></div><span class="option-text">語言/翻譯</span></label>
+                    <label class="option" onclick="mul(this,'major','其他')"><div class="option-checkbox"></div><span class="option-text">其他</span></label>
+                </div>
+            </div>
+            <div class="question">
+                <div class="question-label"><span class="question-num">Q8</span><span>工作經驗年限</span></div>
+                <div class="options-grid">
+                    <label class="option" onclick="sel(this,'experience','應屆/無經驗')"><div class="option-radio"></div><span class="option-text">應屆/無經驗</span></label>
+                    <label class="option" onclick="sel(this,'experience','1-2年')"><div class="option-radio"></div><span class="option-text">1-2年</span></label>
+                    <label class="option" onclick="sel(this,'experience','3-5年')"><div class="option-radio"></div><span class="option-text">3-5年</span></label>
+                    <label class="option" onclick="sel(this,'experience','6-10年')"><div class="option-radio"></div><span class="option-text">6-10年</span></label>
+                    <label class="option" onclick="sel(this,'experience','10年以上')"><div class="option-radio"></div><span class="option-text">10年以上</span></label>
+                </div>
+            </div>
+            <div class="nav-buttons">
+                <button class="nav-btn prev" onclick="prevSection()">← 上一步</button>
+                <button class="nav-btn next" onclick="nextSection()">下一步 →</button>
+            </div>
+        </div>
+
+        <!-- Section 3: 技能能力 -->
+        <div class="section" id="section3">
+            <div class="section-header">
+                <div class="section-number">PART 03</div>
+                <h2 class="section-title">技能與能力</h2>
+                <p class="section-desc">你的專業技能和核心能力</p>
+            </div>
+            <div class="question">
+                <div class="question-label"><span class="question-num">Q9</span><span>語言能力（選擇流利的，可多選）</span></div>
+                <div class="options-grid">
+                    <label class="option" onclick="mul(this,'languages','普通話')"><div class="option-checkbox"></div><span class="option-text">普通話</span></label>
+                    <label class="option" onclick="mul(this,'languages','粵語')"><div class="option-checkbox"></div><span class="option-text">粵語</span></label>
+                    <label class="option" onclick="mul(this,'languages','英語')"><div class="option-checkbox"></div><span class="option-text">英語</span></label>
+                    <label class="option" onclick="mul(this,'languages','葡語')"><div class="option-checkbox"></div><span class="option-text">葡語</span></label>
+                </div>
+            </div>
+            <div class="question">
+                <div class="question-label"><span class="question-num">Q10</span><span>技術技能（可多選）</span></div>
+                <div class="options-grid">
+                    <label class="option" onclick="mul(this,'techSkills','Python')"><div class="option-checkbox"></div><span class="option-text">Python</span></label>
+                    <label class="option" onclick="mul(this,'techSkills','JavaScript')"><div class="option-checkbox"></div><span class="option-text">JavaScript</span></label>
+                    <label class="option" onclick="mul(this,'techSkills','SQL')"><div class="option-checkbox"></div><span class="option-text">SQL</span></label>
+                    <label class="option" onclick="mul(this,'techSkills','AI工具')"><div class="option-checkbox"></div><span class="option-text">AI工具使用</span></label>
+                    <label class="option" onclick="mul(this,'techSkills','n8n/自動化')"><div class="option-checkbox"></div><span class="option-text">n8n/自動化</span></label>
+                    <label class="option" onclick="mul(this,'techSkills','數據分析')"><div class="option-checkbox"></div><span class="option-text">數據分析</span></label>
+                    <label class="option" onclick="mul(this,'techSkills','設計工具')"><div class="option-checkbox"></div><span class="option-text">Figma/設計</span></label>
+                    <label class="option" onclick="mul(this,'techSkills','不會編程')"><div class="option-checkbox"></div><span class="option-text">不會編程</span></label>
+                </div>
+            </div>
+            <div class="question">
+                <div class="question-label"><span class="question-num">Q11</span><span>你最強的3項能力<span class="required">*</span></span></div>
+                <div class="options-grid">
+                    <label class="option" onclick="mul(this,'abilities','邏輯分析',3)"><div class="option-checkbox"></div><span class="option-text">邏輯分析</span></label>
+                    <label class="option" onclick="mul(this,'abilities','創意思維',3)"><div class="option-checkbox"></div><span class="option-text">創意思維</span></label>
+                    <label class="option" onclick="mul(this,'abilities','溝通表達',3)"><div class="option-checkbox"></div><span class="option-text">溝通表達</span></label>
+                    <label class="option" onclick="mul(this,'abilities','文字寫作',3)"><div class="option-checkbox"></div><span class="option-text">文字寫作</span></label>
+                    <label class="option" onclick="mul(this,'abilities','項目管理',3)"><div class="option-checkbox"></div><span class="option-text">項目管理</span></label>
+                    <label class="option" onclick="mul(this,'abilities','技術開發',3)"><div class="option-checkbox"></div><span class="option-text">技術開發</span></label>
+                    <label class="option" onclick="mul(this,'abilities','團隊協作',3)"><div class="option-checkbox"></div><span class="option-text">團隊協作</span></label>
+                    <label class="option" onclick="mul(this,'abilities','學習能力',3)"><div class="option-checkbox"></div><span class="option-text">學習能力</span></label>
+                    <label class="option" onclick="mul(this,'abilities','執行力',3)"><div class="option-checkbox"></div><span class="option-text">執行力</span></label>
+                    <label class="option" onclick="mul(this,'abilities','細節把控',3)"><div class="option-checkbox"></div><span class="option-text">細節把控</span></label>
+                </div>
+            </div>
+            <div class="nav-buttons">
+                <button class="nav-btn prev" onclick="prevSection()">← 上一步</button>
+                <button class="nav-btn next" onclick="nextSection()">下一步 →</button>
+            </div>
+        </div>
+        <!-- Section 4: MBTI -->
+        <div class="section" id="section4">
+            <div class="section-header">
+                <div class="section-number">PART 04</div>
+                <h2 class="section-title">性格類型</h2>
+                <p class="section-desc">了解你的MBTI性格傾向</p>
+            </div>
+            <div class="question">
+                <div class="question-label"><span class="question-num">Q12</span><span>你是否知道自己的MBTI？</span></div>
+                <div class="options">
+                    <label class="option" onclick="sel(this,'mbtiKnown','知道')"><div class="option-radio"></div><span class="option-text">知道（請在下方選擇）</span></label>
+                    <label class="option" onclick="sel(this,'mbtiKnown','不確定')"><div class="option-radio"></div><span class="option-text">不確定（請回答後續問題）</span></label>
+                </div>
+            </div>
+            <div class="question">
+                <div class="question-label"><span class="question-num">Q13</span><span>你的MBTI類型是？</span></div>
+                <div class="options-grid">
+                    <label class="option" onclick="sel(this,'mbtiType','INTJ')"><div class="option-radio"></div><span class="option-text">INTJ 策略家</span></label>
+                    <label class="option" onclick="sel(this,'mbtiType','INTP')"><div class="option-radio"></div><span class="option-text">INTP 邏輯學家</span></label>
+                    <label class="option" onclick="sel(this,'mbtiType','ENTJ')"><div class="option-radio"></div><span class="option-text">ENTJ 指揮官</span></label>
+                    <label class="option" onclick="sel(this,'mbtiType','ENTP')"><div class="option-radio"></div><span class="option-text">ENTP 辯論家</span></label>
+                    <label class="option" onclick="sel(this,'mbtiType','INFJ')"><div class="option-radio"></div><span class="option-text">INFJ 提倡者</span></label>
+                    <label class="option" onclick="sel(this,'mbtiType','INFP')"><div class="option-radio"></div><span class="option-text">INFP 調停者</span></label>
+                    <label class="option" onclick="sel(this,'mbtiType','ENFJ')"><div class="option-radio"></div><span class="option-text">ENFJ 主人公</span></label>
+                    <label class="option" onclick="sel(this,'mbtiType','ENFP')"><div class="option-radio"></div><span class="option-text">ENFP 競選者</span></label>
+                    <label class="option" onclick="sel(this,'mbtiType','ISTJ')"><div class="option-radio"></div><span class="option-text">ISTJ 物流師</span></label>
+                    <label class="option" onclick="sel(this,'mbtiType','ISFJ')"><div class="option-radio"></div><span class="option-text">ISFJ 守衛者</span></label>
+                    <label class="option" onclick="sel(this,'mbtiType','ESTJ')"><div class="option-radio"></div><span class="option-text">ESTJ 總經理</span></label>
+                    <label class="option" onclick="sel(this,'mbtiType','ESFJ')"><div class="option-radio"></div><span class="option-text">ESFJ 執政官</span></label>
+                    <label class="option" onclick="sel(this,'mbtiType','ISTP')"><div class="option-radio"></div><span class="option-text">ISTP 鑒賞家</span></label>
+                    <label class="option" onclick="sel(this,'mbtiType','ISFP')"><div class="option-radio"></div><span class="option-text">ISFP 探險家</span></label>
+                    <label class="option" onclick="sel(this,'mbtiType','ESTP')"><div class="option-radio"></div><span class="option-text">ESTP 企業家</span></label>
+                    <label class="option" onclick="sel(this,'mbtiType','ESFP')"><div class="option-radio"></div><span class="option-text">ESFP 表演者</span></label>
+                </div>
+            </div>
+            <div class="question">
+                <div class="question-label"><span class="question-num">Q14</span><span>能量來源：疲憊時你更傾向？<span class="required">*</span></span></div>
+                <div class="options">
+                    <label class="option" onclick="sel(this,'mbtiE','E')"><div class="option-radio"></div><span class="option-text">和朋友聚會、聊天恢復精力</span></label>
+                    <label class="option" onclick="sel(this,'mbtiE','I')"><div class="option-radio"></div><span class="option-text">獨處、安靜休息恢復精力</span></label>
+                </div>
+            </div>
+            <div class="question">
+                <div class="question-label"><span class="question-num">Q15</span><span>信息獲取：你更關注？<span class="required">*</span></span></div>
+                <div class="options">
+                    <label class="option" onclick="sel(this,'mbtiS','S')"><div class="option-radio"></div><span class="option-text">具體事實和細節，注重實際</span></label>
+                    <label class="option" onclick="sel(this,'mbtiS','N')"><div class="option-radio"></div><span class="option-text">整體概念和可能性，喜歡想像</span></label>
+                </div>
+            </div>
+            <div class="question">
+                <div class="question-label"><span class="question-num">Q16</span><span>決策方式：你更依賴？<span class="required">*</span></span></div>
+                <div class="options">
+                    <label class="option" onclick="sel(this,'mbtiT','T')"><div class="option-radio"></div><span class="option-text">邏輯分析和客觀標準</span></label>
+                    <label class="option" onclick="sel(this,'mbtiT','F')"><div class="option-radio"></div><span class="option-text">個人價值觀和他人感受</span></label>
+                </div>
+            </div>
+            <div class="question">
+                <div class="question-label"><span class="question-num">Q17</span><span>生活方式：你更喜歡？<span class="required">*</span></span></div>
+                <div class="options">
+                    <label class="option" onclick="sel(this,'mbtiJ','J')"><div class="option-radio"></div><span class="option-text">提前計劃、按部就班</span></label>
+                    <label class="option" onclick="sel(this,'mbtiJ','P')"><div class="option-radio"></div><span class="option-text">保持彈性、隨機應變</span></label>
+                </div>
+            </div>
+            <div class="nav-buttons">
+                <button class="nav-btn prev" onclick="prevSection()">← 上一步</button>
+                <button class="nav-btn next" onclick="nextSection()">下一步 →</button>
+            </div>
+        </div>
+
+        <!-- Section 5: 工作風格 -->
+        <div class="section" id="section5">
+            <div class="section-header">
+                <div class="section-number">PART 05</div>
+                <h2 class="section-title">工作風格</h2>
+                <p class="section-desc">你的工作習慣和偏好</p>
+            </div>
+            <div class="question">
+                <div class="question-label"><span class="question-num">Q18</span><span>面對壓力時，你通常？<span class="required">*</span></span></div>
+                <div class="options">
+                    <label class="option" onclick="sel(this,'stress','更專注效率更高')"><div class="option-radio"></div><span class="option-text">變得更專注，效率更高</span></label>
+                    <label class="option" onclick="sel(this,'stress','需要時間調整')"><div class="option-radio"></div><span class="option-text">感到焦慮，需要時間調整</span></label>
+                    <label class="option" onclick="sel(this,'stress','尋求他人支持')"><div class="option-radio"></div><span class="option-text">尋求他人支持和幫助</span></label>
+                    <label class="option" onclick="sel(this,'stress','保持冷靜執行')"><div class="option-radio"></div><span class="option-text">保持冷靜，按計劃執行</span></label>
+                </div>
+            </div>
+            <div class="question">
+                <div class="question-label"><span class="question-num">Q19</span><span>工作節奏偏好<span class="required">*</span></span></div>
+                <div class="options">
+                    <label class="option" onclick="sel(this,'pace','快節奏多任務')"><div class="option-radio"></div><span class="option-text">喜歡快節奏，多任務並行</span></label>
+                    <label class="option" onclick="sel(this,'pace','專注一件事')"><div class="option-radio"></div><span class="option-text">喜歡專注一件事，做完再做下一件</span></label>
+                    <label class="option" onclick="sel(this,'pace','都能適應')"><div class="option-radio"></div><span class="option-text">視情況而定，都能適應</span></label>
+                </div>
+            </div>
+            <div class="question">
+                <div class="question-label"><span class="question-num">Q20</span><span>對於Deadline，你通常？</span></div>
+                <div class="options">
+                    <label class="option" onclick="sel(this,'deadline','提前完成')"><div class="option-radio"></div><span class="option-text">提前完成，留有餘地</span></label>
+                    <label class="option" onclick="sel(this,'deadline','按時完成')"><div class="option-radio"></div><span class="option-text">按時完成，剛剛好</span></label>
+                    <label class="option" onclick="sel(this,'deadline','需要壓力')"><div class="option-radio"></div><span class="option-text">需要壓力才能激發動力</span></label>
+                </div>
+            </div>
+            <div class="question">
+                <div class="question-label"><span class="question-num">Q21</span><span>更喜歡哪種工作方式？</span></div>
+                <div class="options">
+                    <label class="option" onclick="sel(this,'workMode','獨立工作')"><div class="option-radio"></div><span class="option-text">獨立工作，自己負責</span></label>
+                    <label class="option" onclick="sel(this,'workMode','團隊合作')"><div class="option-radio"></div><span class="option-text">團隊合作，分工協作</span></label>
+                    <label class="option" onclick="sel(this,'workMode','視情況而定')"><div class="option-radio"></div><span class="option-text">兩者皆可，視任務而定</span></label>
+                </div>
+            </div>
+            <div class="question">
+                <div class="question-label"><span class="question-num">Q22</span><span>對「模糊指令」的反應？</span></div>
+                <div class="options">
+                    <label class="option" onclick="sel(this,'ambiguity','喜歡有空間')"><div class="option-radio"></div><span class="option-text">喜歡，給了我發揮空間</span></label>
+                    <label class="option" onclick="sel(this,'ambiguity','不喜歡但能應對')"><div class="option-radio"></div><span class="option-text">不太喜歡，但能應對</span></label>
+                    <label class="option" onclick="sel(this,'ambiguity','希望清晰指引')"><div class="option-radio"></div><span class="option-text">很不喜歡，希望有清晰指引</span></label>
+                </div>
+            </div>
+            <div class="question">
+                <div class="question-label"><span class="question-num">Q23</span><span>對「學習新技能」的態度？</span></div>
+                <div class="options">
+                    <label class="option" onclick="sel(this,'learning','非常積極')"><div class="option-radio"></div><span class="option-text">非常積極，喜歡不斷學習</span></label>
+                    <label class="option" onclick="sel(this,'learning','比較積極')"><div class="option-radio"></div><span class="option-text">比較積極，工作需要就學</span></label>
+                    <label class="option" onclick="sel(this,'learning','一般')"><div class="option-radio"></div><span class="option-text">一般，更喜歡用熟悉的方法</span></label>
+                </div>
+            </div>
+            <div class="nav-buttons">
+                <button class="nav-btn prev" onclick="prevSection()">← 上一步</button>
+                <button class="nav-btn next" onclick="nextSection()">下一步 →</button>
+            </div>
+        </div>
+
+        <!-- Section 6: 溝通風格 -->
+        <div class="section" id="section6">
+            <div class="section-header">
+                <div class="section-number">PART 06</div>
+                <h2 class="section-title">溝通風格</h2>
+                <p class="section-desc">你的溝通習慣和偏好</p>
+            </div>
+            <div class="question">
+                <div class="question-label"><span class="question-num">Q24</span><span>你在會議中通常？<span class="required">*</span></span></div>
+                <div class="options">
+                    <label class="option" onclick="sel(this,'meeting','積極發言')"><div class="option-radio"></div><span class="option-text">積極發言，喜歡主導討論</span></label>
+                    <label class="option" onclick="sel(this,'meeting','適時發言')"><div class="option-radio"></div><span class="option-text">適時發言，有想法就說</span></label>
+                    <label class="option" onclick="sel(this,'meeting','傾向傾聽')"><div class="option-radio"></div><span class="option-text">傾向傾聽，被問到才發言</span></label>
+                    <label class="option" onclick="sel(this,'meeting','比較安靜')"><div class="option-radio"></div><span class="option-text">比較安靜，會後私下溝通</span></label>
+                </div>
+            </div>
+            <div class="question">
+                <div class="question-label"><span class="question-num">Q25</span><span>最偏好的溝通方式？<span class="required">*</span></span></div>
+                <div class="options">
+                    <label class="option" onclick="sel(this,'commChannel','即時消息')"><div class="option-radio"></div><span class="option-text">即時消息（微信、飛書）</span></label>
+                    <label class="option" onclick="sel(this,'commChannel','郵件/文檔')"><div class="option-radio"></div><span class="option-text">郵件/文檔</span></label>
+                    <label class="option" onclick="sel(this,'commChannel','面對面')"><div class="option-radio"></div><span class="option-text">面對面/視頻通話</span></label>
+                    <label class="option" onclick="sel(this,'commChannel','語音')"><div class="option-radio"></div><span class="option-text">語音通話</span></label>
+                </div>
+            </div>
+            <div class="question">
+                <div class="question-label"><span class="question-num">Q26</span><span>接收信息的偏好？</span></div>
+                <div class="options">
+                    <label class="option" onclick="sel(this,'infoStyle','先結論後細節')"><div class="option-radio"></div><span class="option-text">先給我結論，再說細節</span></label>
+                    <label class="option" onclick="sel(this,'infoStyle','先背景後結論')"><div class="option-radio"></div><span class="option-text">先說背景，再給結論</span></label>
+                    <label class="option" onclick="sel(this,'infoStyle','邏輯遞進')"><div class="option-radio"></div><span class="option-text">按邏輯順序，層層遞進</span></label>
+                </div>
+            </div>
+            <div class="question">
+                <div class="question-label"><span class="question-num">Q27</span><span>被批評時，你通常？</span></div>
+                <div class="options">
+                    <label class="option" onclick="sel(this,'criticism','能接受視為機會')"><div class="option-radio"></div><span class="option-text">能夠接受，視為改進機會</span></label>
+                    <label class="option" onclick="sel(this,'criticism','需要時間消化')"><div class="option-radio"></div><span class="option-text">需要時間消化，但最終能接受</span></label>
+                    <label class="option" onclick="sel(this,'criticism','比較敏感')"><div class="option-radio"></div><span class="option-text">比較敏感，需要委婉方式</span></label>
+                </div>
+            </div>
+            <div class="question">
+                <div class="question-label"><span class="question-num">Q28</span><span>給他人反饋時通常？</span></div>
+                <div class="options">
+                    <label class="option" onclick="sel(this,'feedback','直接指出')"><div class="option-radio"></div><span class="option-text">直接指出問題，不繞彎子</span></label>
+                    <label class="option" onclick="sel(this,'feedback','先肯定後建議')"><div class="option-radio"></div><span class="option-text">先肯定，再委婉提出問題</span></label>
+                    <label class="option" onclick="sel(this,'feedback','比較婉轉')"><div class="option-radio"></div><span class="option-text">比較婉轉，怕傷害對方</span></label>
+                </div>
+            </div>
+            <div class="nav-buttons">
+                <button class="nav-btn prev" onclick="prevSection()">← 上一步</button>
+                <button class="nav-btn next" onclick="nextSection()">下一步 →</button>
+            </div>
+        </div>
+        <!-- Section 7: 團隊協作 -->
+        <div class="section" id="section7">
+            <div class="section-header">
+                <div class="section-number">PART 07</div>
+                <h2 class="section-title">團隊協作</h2>
+                <p class="section-desc">你在團隊中的角色和期望</p>
+            </div>
+            <div class="question">
+                <div class="question-label"><span class="question-num">Q29</span><span>在團隊中，你通常扮演？<span class="required">*</span></span></div>
+                <div class="options-grid">
+                    <label class="option" onclick="sel(this,'teamRole','領導者')"><div class="option-radio"></div><span class="option-text">領導者：主導方向</span></label>
+                    <label class="option" onclick="sel(this,'teamRole','推動者')"><div class="option-radio"></div><span class="option-text">推動者：推動進度</span></label>
+                    <label class="option" onclick="sel(this,'teamRole','創意者')"><div class="option-radio"></div><span class="option-text">創意者：提供新想法</span></label>
+                    <label class="option" onclick="sel(this,'teamRole','協調者')"><div class="option-radio"></div><span class="option-text">協調者：促進合作</span></label>
+                    <label class="option" onclick="sel(this,'teamRole','執行者')"><div class="option-radio"></div><span class="option-text">執行者：專注任務</span></label>
+                    <label class="option" onclick="sel(this,'teamRole','完善者')"><div class="option-radio"></div><span class="option-text">完善者：注重質量</span></label>
+                </div>
+            </div>
+            <div class="question">
+                <div class="question-label"><span class="question-num">Q30</span><span>希望同事如何與你協作？（可多選）</span></div>
+                <div class="options-grid">
+                    <label class="option" onclick="mul(this,'expectColleague','清晰說明任務')"><div class="option-checkbox"></div><span class="option-text">清晰說明任務和期望</span></label>
+                    <label class="option" onclick="mul(this,'expectColleague','給自主空間')"><div class="option-checkbox"></div><span class="option-text">給足夠的自主空間</span></label>
+                    <label class="option" onclick="mul(this,'expectColleague','及時反饋')"><div class="option-checkbox"></div><span class="option-text">及時反饋和溝通</span></label>
+                    <label class="option" onclick="mul(this,'expectColleague','尊重時間節奏')"><div class="option-checkbox"></div><span class="option-text">尊重我的時間和節奏</span></label>
+                    <label class="option" onclick="mul(this,'expectColleague','提供支持')"><div class="option-checkbox"></div><span class="option-text">必要時提供支持幫助</span></label>
+                    <label class="option" onclick="mul(this,'expectColleague','認可貢獻')"><div class="option-checkbox"></div><span class="option-text">認可我的貢獻</span></label>
+                </div>
+            </div>
+            <div class="question">
+                <div class="question-label"><span class="question-num">Q31</span><span>最不能接受的同事行為？（選2項）</span></div>
+                <div class="options-grid">
+                    <label class="option" onclick="mul(this,'unacceptable','不守承諾',2)"><div class="option-checkbox"></div><span class="option-text">不守時/不守承諾</span></label>
+                    <label class="option" onclick="mul(this,'unacceptable','推卸責任',2)"><div class="option-checkbox"></div><span class="option-text">推卸責任</span></label>
+                    <label class="option" onclick="mul(this,'unacceptable','溝通不清晰',2)"><div class="option-checkbox"></div><span class="option-text">溝通不清晰</span></label>
+                    <label class="option" onclick="mul(this,'unacceptable','過度干涉',2)"><div class="option-checkbox"></div><span class="option-text">過度干涉我的工作</span></label>
+                    <label class="option" onclick="mul(this,'unacceptable','態度傲慢',2)"><div class="option-checkbox"></div><span class="option-text">態度傲慢</span></label>
+                    <label class="option" onclick="mul(this,'unacceptable','不回消息',2)"><div class="option-checkbox"></div><span class="option-text">不回消息</span></label>
+                </div>
+            </div>
+            <div class="question">
+                <div class="question-label"><span class="question-num">Q32</span><span>遇到意見分歧時？</span></div>
+                <div class="options">
+                    <label class="option" onclick="sel(this,'conflict','堅持己見')"><div class="option-radio"></div><span class="option-text">堅持己見，說服對方</span></label>
+                    <label class="option" onclick="sel(this,'conflict','用數據判斷')"><div class="option-radio"></div><span class="option-text">尋求數據/事實來判斷</span></label>
+                    <label class="option" onclick="sel(this,'conflict','傾向妥協')"><div class="option-radio"></div><span class="option-text">傾向妥協，保持和諧</span></label>
+                    <label class="option" onclick="sel(this,'conflict','聽從上級')"><div class="option-radio"></div><span class="option-text">聽從上級決定</span></label>
+                </div>
+            </div>
+            <div class="question">
+                <div class="question-label"><span class="question-num">Q33</span><span>對「被管理」的偏好？</span></div>
+                <div class="options">
+                    <label class="option" onclick="sel(this,'management','明確指導')"><div class="option-radio"></div><span class="option-text">希望有明確指導和反饋</span></label>
+                    <label class="option" onclick="sel(this,'management','給目標自己把控')"><div class="option-radio"></div><span class="option-text">給目標，過程自己把控</span></label>
+                    <label class="option" onclick="sel(this,'management','完全自主')"><div class="option-radio"></div><span class="option-text">完全自主，有問題再找領導</span></label>
+                </div>
+            </div>
+            <div class="nav-buttons">
+                <button class="nav-btn prev" onclick="prevSection()">← 上一步</button>
+                <button class="nav-btn next" onclick="nextSection()">下一步 →</button>
+            </div>
+        </div>
+
+        <!-- Section 8: 價值觀與生活 -->
+        <div class="section" id="section8">
+            <div class="section-header">
+                <div class="section-number">PART 08</div>
+                <h2 class="section-title">價值觀與生活</h2>
+                <p class="section-desc">你的工作動力和生活習慣</p>
+            </div>
+            <div class="question">
+                <div class="question-label"><span class="question-num">Q34</span><span>最有成就感的是？（選3項）<span class="required">*</span></span></div>
+                <div class="options-grid">
+                    <label class="option" onclick="mul(this,'achievement','解決複雜問題',3)"><div class="option-checkbox"></div><span class="option-text">解決複雜問題</span></label>
+                    <label class="option" onclick="mul(this,'achievement','創造新東西',3)"><div class="option-checkbox"></div><span class="option-text">創造新的東西</span></label>
+                    <label class="option" onclick="mul(this,'achievement','幫助他人',3)"><div class="option-checkbox"></div><span class="option-text">幫助他人/客戶</span></label>
+                    <label class="option" onclick="mul(this,'achievement','獲得認可',3)"><div class="option-checkbox"></div><span class="option-text">獲得認可和讚賞</span></label>
+                    <label class="option" onclick="mul(this,'achievement','學習成長',3)"><div class="option-checkbox"></div><span class="option-text">學習和成長</span></label>
+                    <label class="option" onclick="mul(this,'achievement','團隊成功',3)"><div class="option-checkbox"></div><span class="option-text">團隊合作成功</span></label>
+                </div>
+            </div>
+            <div class="question">
+                <div class="question-label"><span class="question-num">Q35</span><span>選擇工作最看重？（選3項）<span class="required">*</span></span></div>
+                <div class="options-grid">
+                    <label class="option" onclick="mul(this,'values','薪資福利',3)"><div class="option-checkbox"></div><span class="option-text">薪資福利</span></label>
+                    <label class="option" onclick="mul(this,'values','成長空間',3)"><div class="option-checkbox"></div><span class="option-text">成長空間</span></label>
+                    <label class="option" onclick="mul(this,'values','公司前景',3)"><div class="option-checkbox"></div><span class="option-text">公司前景</span></label>
+                    <label class="option" onclick="mul(this,'values','團隊氛圍',3)"><div class="option-checkbox"></div><span class="option-text">團隊氛圍</span></label>
+                    <label class="option" onclick="mul(this,'values','工作有趣',3)"><div class="option-checkbox"></div><span class="option-text">工作內容有趣</span></label>
+                    <label class="option" onclick="mul(this,'values','時間彈性',3)"><div class="option-checkbox"></div><span class="option-text">工作時間彈性</span></label>
+                </div>
+            </div>
+            <div class="question">
+                <div class="question-label"><span class="question-num">Q36</span><span>對「加班」的態度？</span></div>
+                <div class="options">
+                    <label class="option" onclick="sel(this,'overtime','隨時可以')"><div class="option-radio"></div><span class="option-text">如果工作需要，隨時可以</span></label>
+                    <label class="option" onclick="sel(this,'overtime','偶爾可以')"><div class="option-radio"></div><span class="option-text">偶爾可以，但希望不是常態</span></label>
+                    <label class="option" onclick="sel(this,'overtime','不太願意')"><div class="option-radio"></div><span class="option-text">不太願意，重視工作生活平衡</span></label>
+                </div>
+            </div>
+            <div class="question">
+                <div class="question-label"><span class="question-num">Q37</span><span>通常的作息時間？</span></div>
+                <div class="options">
+                    <label class="option" onclick="sel(this,'schedule','早睡早起')"><div class="option-radio"></div><span class="option-text">早睡早起型（22:00前睡）</span></label>
+                    <label class="option" onclick="sel(this,'schedule','正常作息')"><div class="option-radio"></div><span class="option-text">正常作息型（23:00左右睡）</span></label>
+                    <label class="option" onclick="sel(this,'schedule','夜貓子')"><div class="option-radio"></div><span class="option-text">夜貓子型（24:00後睡）</span></label>
+                </div>
+            </div>
+            <div class="question">
+                <div class="question-label"><span class="question-num">Q38</span><span>精力高峰期通常在？</span></div>
+                <div class="options-grid">
+                    <label class="option" onclick="sel(this,'peakTime','上午')"><div class="option-radio"></div><span class="option-text">上午 9:00-12:00</span></label>
+                    <label class="option" onclick="sel(this,'peakTime','下午')"><div class="option-radio"></div><span class="option-text">下午 14:00-18:00</span></label>
+                    <label class="option" onclick="sel(this,'peakTime','晚上')"><div class="option-radio"></div><span class="option-text">晚上 19:00-23:00</span></label>
+                    <label class="option" onclick="sel(this,'peakTime','深夜')"><div class="option-radio"></div><span class="option-text">深夜 23:00後</span></label>
+                </div>
+            </div>
+            <div class="question">
+                <div class="question-label"><span class="question-num">Q39</span><span>喜歡的工作環境？</span></div>
+                <div class="options">
+                    <label class="option" onclick="sel(this,'environment','安靜無干擾')"><div class="option-radio"></div><span class="option-text">安靜，無干擾</span></label>
+                    <label class="option" onclick="sel(this,'environment','有背景音')"><div class="option-radio"></div><span class="option-text">有適度背景音/音樂</span></label>
+                    <label class="option" onclick="sel(this,'environment','熱鬧交流')"><div class="option-radio"></div><span class="option-text">熱鬧，有同事交流</span></label>
+                    <label class="option" onclick="sel(this,'environment','都能適應')"><div class="option-radio"></div><span class="option-text">都可以，能適應</span></label>
+                </div>
+            </div>
+            <div class="nav-buttons">
+                <button class="nav-btn prev" onclick="prevSection()">← 上一步</button>
+                <button class="nav-btn next" onclick="nextSection()">下一步 →</button>
+            </div>
+        </div>
+        <!-- Section 9: AI協作 -->
+        <div class="section" id="section9">
+            <div class="section-header">
+                <div class="section-number">PART 09</div>
+                <h2 class="section-title">AI協作偏好</h2>
+                <p class="section-desc">讓AI總監更好地配合你</p>
+            </div>
+            <div class="question">
+                <div class="question-label"><span class="question-num">Q40</span><span>使用AI工具的頻率？<span class="required">*</span></span></div>
+                <div class="options">
+                    <label class="option" onclick="sel(this,'aiFreq','每天都用')"><div class="option-radio"></div><span class="option-text">每天都用</span></label>
+                    <label class="option" onclick="sel(this,'aiFreq','每週幾次')"><div class="option-radio"></div><span class="option-text">每週幾次</span></label>
+                    <label class="option" onclick="sel(this,'aiFreq','偶爾用')"><div class="option-radio"></div><span class="option-text">偶爾用</span></label>
+                    <label class="option" onclick="sel(this,'aiFreq','很少用')"><div class="option-radio"></div><span class="option-text">很少/從不用</span></label>
+                </div>
+            </div>
+            <div class="question">
+                <div class="question-label"><span class="question-num">Q41</span><span>主要用AI做什麼？（可多選）</span></div>
+                <div class="options-grid">
+                    <label class="option" onclick="mul(this,'aiUsage','寫作文案')"><div class="option-checkbox"></div><span class="option-text">寫作/文案</span></label>
+                    <label class="option" onclick="mul(this,'aiUsage','編程代碼')"><div class="option-checkbox"></div><span class="option-text">編程/代碼</span></label>
+                    <label class="option" onclick="mul(this,'aiUsage','數據分析')"><div class="option-checkbox"></div><span class="option-text">數據分析</span></label>
+                    <label class="option" onclick="mul(this,'aiUsage','搜索研究')"><div class="option-checkbox"></div><span class="option-text">搜索/研究</span></label>
+                    <label class="option" onclick="mul(this,'aiUsage','創意頭腦風暴')"><div class="option-checkbox"></div><span class="option-text">創意/頭腦風暴</span></label>
+                    <label class="option" onclick="mul(this,'aiUsage','學習新知識')"><div class="option-checkbox"></div><span class="option-text">學習新知識</span></label>
+                    <label class="option" onclick="mul(this,'aiUsage','翻譯')"><div class="option-checkbox"></div><span class="option-text">翻譯</span></label>
+                    <label class="option" onclick="mul(this,'aiUsage','不怎麼用')"><div class="option-checkbox"></div><span class="option-text">不怎麼用</span></label>
+                </div>
+            </div>
+            <div class="question">
+                <div class="question-label"><span class="question-num">Q42</span><span>希望AI總監如何溝通？<span class="required">*</span></span></div>
+                <div class="options">
+                    <label class="option" onclick="sel(this,'aiStyle','直接簡潔')"><div class="option-radio"></div><span class="option-text">直接、簡潔，只說重點</span></label>
+                    <label class="option" onclick="sel(this,'aiStyle','詳細完整')"><div class="option-radio"></div><span class="option-text">詳細、完整，給足背景</span></label>
+                    <label class="option" onclick="sel(this,'aiStyle','有溫度')"><div class="option-radio"></div><span class="option-text">有溫度，像朋友一樣</span></label>
+                    <label class="option" onclick="sel(this,'aiStyle','專業嚴謹')"><div class="option-radio"></div><span class="option-text">專業嚴謹，像顧問一樣</span></label>
+                </div>
+            </div>
+            <div class="question">
+                <div class="question-label"><span class="question-num">Q43</span><span>希望AI總監何時主動聯繫？</span></div>
+                <div class="options">
+                    <label class="option" onclick="sel(this,'aiContact','重要事項隨時')"><div class="option-radio"></div><span class="option-text">有重要事項時隨時聯繫</span></label>
+                    <label class="option" onclick="sel(this,'aiContact','僅被動回覆')"><div class="option-radio"></div><span class="option-text">僅在我主動詢問時回覆</span></label>
+                    <label class="option" onclick="sel(this,'aiContact','定期主動建議')"><div class="option-radio"></div><span class="option-text">定期主動提供工作建議</span></label>
+                </div>
+            </div>
+            <div class="question">
+                <div class="question-label"><span class="question-num">Q44</span><span>對AI的信任程度？</span></div>
+                <div class="options">
+                    <label class="option" onclick="sel(this,'aiTrust','非常信任')"><div class="option-radio"></div><span class="option-text">非常信任，建議基本採納</span></label>
+                    <label class="option" onclick="sel(this,'aiTrust','比較信任')"><div class="option-radio"></div><span class="option-text">比較信任，但會自己判斷</span></label>
+                    <label class="option" onclick="sel(this,'aiTrust','一般')"><div class="option-radio"></div><span class="option-text">一般，只作為參考</span></label>
+                    <label class="option" onclick="sel(this,'aiTrust','不太信任')"><div class="option-radio"></div><span class="option-text">不太信任，更相信自己</span></label>
+                </div>
+            </div>
+            <div class="nav-buttons">
+                <button class="nav-btn prev" onclick="prevSection()">← 上一步</button>
+                <button class="nav-btn next" onclick="nextSection()">下一步 →</button>
+            </div>
+        </div>
+
+        <!-- Section 10: 發展規劃 -->
+        <div class="section" id="section10">
+            <div class="section-header">
+                <div class="section-number">PART 10</div>
+                <h2 class="section-title">發展規劃</h2>
+                <p class="section-desc">最後一步！告訴我們你的期望</p>
+            </div>
+            <div class="question">
+                <div class="question-label"><span class="question-num">Q45</span><span>加入MAX AI最想獲得？（選3項）<span class="required">*</span></span></div>
+                <div class="options-grid">
+                    <label class="option" onclick="mul(this,'expectations','穩定收入',3)"><div class="option-checkbox"></div><span class="option-text">穩定的收入</span></label>
+                    <label class="option" onclick="mul(this,'expectations','技能成長',3)"><div class="option-checkbox"></div><span class="option-text">技能提升和成長</span></label>
+                    <label class="option" onclick="mul(this,'expectations','有意義工作',3)"><div class="option-checkbox"></div><span class="option-text">有意義的工作內容</span></label>
+                    <label class="option" onclick="mul(this,'expectations','創業經歷',3)"><div class="option-checkbox"></div><span class="option-text">創業經歷和經驗</span></label>
+                    <label class="option" onclick="mul(this,'expectations','人脈資源',3)"><div class="option-checkbox"></div><span class="option-text">人脈和資源</span></label>
+                    <label class="option" onclick="mul(this,'expectations','認可成就感',3)"><div class="option-checkbox"></div><span class="option-text">認可和成就感</span></label>
+                </div>
+            </div>
+            <div class="question">
+                <div class="question-label"><span class="question-num">Q46</span><span>1年目標？（可多選）</span></div>
+                <div class="options-grid">
+                    <label class="option" onclick="mul(this,'oneYearGoal','熟悉業務')"><div class="option-checkbox"></div><span class="option-text">熟悉公司業務和流程</span></label>
+                    <label class="option" onclick="mul(this,'oneYearGoal','掌握技能')"><div class="option-checkbox"></div><span class="option-text">掌握核心技能</span></label>
+                    <label class="option" onclick="mul(this,'oneYearGoal','獨立負責項目')"><div class="option-checkbox"></div><span class="option-text">獨立負責項目</span></label>
+                    <label class="option" onclick="mul(this,'oneYearGoal','建立信任')"><div class="option-checkbox"></div><span class="option-text">建立團隊信任</span></label>
+                    <label class="option" onclick="mul(this,'oneYearGoal','獲得晉升')"><div class="option-checkbox"></div><span class="option-text">獲得晉升</span></label>
+                </div>
+            </div>
+            <div class="question">
+                <div class="question-label"><span class="question-num">Q47</span><span>3年職業規劃？</span></div>
+                <div class="options">
+                    <label class="option" onclick="sel(this,'threeYearPlan','成為專家')"><div class="option-radio"></div><span class="option-text">成為專業領域專家</span></label>
+                    <label class="option" onclick="sel(this,'threeYearPlan','管理路線')"><div class="option-radio"></div><span class="option-text">走管理路線，帶團隊</span></label>
+                    <label class="option" onclick="sel(this,'threeYearPlan','創業發展')"><div class="option-radio"></div><span class="option-text">創業或獨立發展</span></label>
+                    <label class="option" onclick="sel(this,'threeYearPlan','還沒想好')"><div class="option-radio"></div><span class="option-text">還沒想好</span></label>
+                </div>
+            </div>
+            <div class="question">
+                <div class="question-label"><span class="question-num">Q48</span><span>用3個詞形容自己<span class="required">*</span></span></div>
+                <div class="options-grid">
+                    <label class="option" onclick="mul(this,'selfWords','專注',3)"><div class="option-checkbox"></div><span class="option-text">專注</span></label>
+                    <label class="option" onclick="mul(this,'selfWords','理性',3)"><div class="option-checkbox"></div><span class="option-text">理性</span></label>
+                    <label class="option" onclick="mul(this,'selfWords','好奇',3)"><div class="option-checkbox"></div><span class="option-text">好奇</span></label>
+                    <label class="option" onclick="mul(this,'selfWords','熱情',3)"><div class="option-checkbox"></div><span class="option-text">熱情</span></label>
+                    <label class="option" onclick="mul(this,'selfWords','細心',3)"><div class="option-checkbox"></div><span class="option-text">細心</span></label>
+                    <label class="option" onclick="mul(this,'selfWords','獨立',3)"><div class="option-checkbox"></div><span class="option-text">獨立</span></label>
+                    <label class="option" onclick="mul(this,'selfWords','創意',3)"><div class="option-checkbox"></div><span class="option-text">創意</span></label>
+                    <label class="option" onclick="mul(this,'selfWords','務實',3)"><div class="option-checkbox"></div><span class="option-text">務實</span></label>
+                    <label class="option" onclick="mul(this,'selfWords','樂觀',3)"><div class="option-checkbox"></div><span class="option-text">樂觀</span></label>
+                    <label class="option" onclick="mul(this,'selfWords','負責',3)"><div class="option-checkbox"></div><span class="option-text">負責</span></label>
+                    <label class="option" onclick="mul(this,'selfWords','親和',3)"><div class="option-checkbox"></div><span class="option-text">親和</span></label>
+                    <label class="option" onclick="mul(this,'selfWords','冷靜',3)"><div class="option-checkbox"></div><span class="option-text">冷靜</span></label>
+                </div>
+            </div>
+            <div class="nav-buttons">
+                <button class="nav-btn prev" onclick="prevSection()">← 上一步</button>
+                <button class="nav-btn next" onclick="submitSurvey()">提交問卷 ✓</button>
+            </div>
+        </div>
+
+        <!-- Loading -->
+        <div class="loading" id="loadingScreen">
+            <div class="spinner"></div>
+            <p style="color:var(--gold)">正在提交問卷...</p>
+        </div>
+
+        <!-- Completion -->
+        <div class="section" id="completionScreen">
+            <div class="completion-screen">
+                <div class="completion-icon">✓</div>
+                <h2>提交成功！</h2>
+                <p style="color:var(--gray-light)">感謝你完成 MAX AI 員工畫像問卷</p>
+                <p style="color:var(--gold)">你的畫像報告將很快生成</p>
+                <div class="result-box">
+                    <p style="color:var(--gold);margin-bottom:10px;font-size:13px">📋 問卷數據</p>
+                    <pre id="resultJson"></pre>
+                </div>
+                <button class="copy-btn" onclick="copyResult()">複製數據</button>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const WEBHOOK_URL = 'https://n8n.maxai-lab.com/webhook/employee-survey';
+        let currentSection = 0;
+        const totalSections = 10;
+        const answers = {};
+        const multiAnswers = {};
+
+        document.getElementById('totalSections').textContent = totalSections;
+
+        function sel(el, field, value) {
+            const q = el.closest('.question');
+            q.querySelectorAll('.option').forEach(o => o.classList.remove('selected'));
+            el.classList.add('selected');
+            answers[field] = value;
+            q.classList.add('answered');
+        }
+
+        function mul(el, field, value, max = 99) {
+            if (!multiAnswers[field]) multiAnswers[field] = [];
+            const arr = multiAnswers[field];
+            const idx = arr.indexOf(value);
+            if (idx > -1) {
+                arr.splice(idx, 1);
+                el.classList.remove('selected');
+            } else {
+                if (arr.length >= max) {
+                    const first = arr.shift();
+                    el.closest('.question').querySelectorAll('.option').forEach(o => {
+                        if (o.querySelector('.option-text')?.textContent === first) {
+                            o.classList.remove('selected');
+                        }
+                    });
+                }
+                arr.push(value);
+                el.classList.add('selected');
+            }
+            answers[field] = [...arr];
+            el.closest('.question').classList.toggle('answered', arr.length > 0);
+        }
+
+        function startSurvey() {
+            document.getElementById('welcomeScreen').style.display = 'none';
+            currentSection = 1;
+            showSection(1);
+        }
+
+        function showSection(num) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            const sec = document.getElementById('section' + num);
+            if (sec) sec.classList.add('active');
+            document.getElementById('currentSection').textContent = num;
+            document.getElementById('progressBar').style.width = (num / totalSections) * 100 + '%';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function nextSection() {
+            if (currentSection < totalSections) {
+                currentSection++;
+                showSection(currentSection);
+            }
+        }
+
+        function prevSection() {
+            if (currentSection > 1) {
+                currentSection--;
+                showSection(currentSection);
+            }
+        }
+
+        function calcMBTI() {
+            if (answers.mbtiType && answers.mbtiKnown === '知道') return answers.mbtiType;
+            return (answers.mbtiE || 'I') + (answers.mbtiS || 'N') + (answers.mbtiT || 'T') + (answers.mbtiJ || 'J');
+        }
+
+        function collectInputs() {
+            document.querySelectorAll('.text-input').forEach(input => {
+                const field = input.dataset.field;
+                if (field && input.value.trim()) answers[field] = input.value.trim();
+            });
+        }
+
+        async function submitSurvey() {
+            collectInputs();
+            const data = {
+                ...answers,
+                mbtiCalculated: calcMBTI(),
+                submittedAt: new Date().toISOString(),
+                version: '1.0'
+            };
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.getElementById('loadingScreen').classList.add('show');
+            try {
+                await fetch(WEBHOOK_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+            } catch (e) {
+                console.error('Submit error:', e);
+            }
+            setTimeout(() => {
+                document.getElementById('loadingScreen').classList.remove('show');
+                document.getElementById('completionScreen').classList.add('active');
+                document.getElementById('resultJson').textContent = JSON.stringify(data, null, 2);
+                document.getElementById('currentSection').textContent = '✓';
+                document.getElementById('progressBar').style.width = '100%';
+            }, 1500);
+        }
+
+        function copyResult() {
+            const text = document.getElementById('resultJson').textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                const btn = document.querySelector('.copy-btn');
+                btn.textContent = '已複製！';
+                btn.style.background = 'var(--gold)';
+                btn.style.color = 'var(--black)';
+                setTimeout(() => {
+                    btn.textContent = '複製數據';
+                    btn.style.background = '';
+                    btn.style.color = '';
+                }, 2000);
+            });
+        }
+    </script>
+</body>
+</html>
