@@ -74,6 +74,11 @@
         .completion-screen{text-align:center;padding:60px 20px}
         .completion-icon{width:100px;height:100px;background:linear-gradient(135deg,var(--gold-dark),var(--gold));border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 30px;font-size:50px}
         .completion-screen h2{font-family:'Orbitron',sans-serif;font-size:28px;color:var(--gold);margin-bottom:15px}
+        .completion-info{background:var(--black-light);border:1px solid rgba(201,169,98,.2);border-radius:12px;padding:25px 30px;margin:20px auto;max-width:400px;text-align:left}
+        .completion-info p{color:var(--gray-light);font-size:14px;padding:8px 0}
+        .download-btn{background:linear-gradient(135deg,var(--gold-dark),var(--gold));color:var(--black);border:none;padding:16px 40px;font-size:16px;font-weight:700;border-radius:8px;cursor:pointer;transition:all .3s;margin-bottom:30px;display:inline-flex;align-items:center;gap:10px}
+        .download-btn:hover{transform:translateY(-2px);box-shadow:0 10px 30px rgba(201,169,98,.4)}
+        .download-icon{font-size:20px}
         .result-box{background:var(--black-light);border:1px solid rgba(201,169,98,.3);border-radius:12px;padding:20px;margin:30px 0;text-align:left;max-height:300px;overflow-y:auto}
         .result-box pre{font-family:monospace;font-size:11px;color:var(--gray-light);white-space:pre-wrap;word-break:break-all}
         .copy-btn{background:var(--black-lighter);border:1px solid var(--gold);color:var(--gold);padding:12px 30px;font-size:14px;border-radius:8px;cursor:pointer;transition:all .3s}
@@ -715,23 +720,29 @@
             <div class="completion-screen">
                 <div class="completion-icon">✓</div>
                 <h2>提交成功！</h2>
-                <p style="color:var(--gray-light)">感謝你完成 MAX AI 員工畫像問卷</p>
-                <p style="color:var(--gold)">你的畫像報告將很快生成</p>
-                <div class="result-box">
-                    <p style="color:var(--gold);margin-bottom:10px;font-size:13px">📋 問卷數據</p>
-                    <pre id="resultJson"></pre>
+                <p style="color:var(--gray-light);margin-bottom:10px">感謝你完成 MAX AI 員工畫像問卷</p>
+                <p style="color:var(--gold);margin-bottom:30px">你的專屬畫像報告將很快生成</p>
+                <button class="download-btn" onclick="downloadPDF()">
+                    <span class="download-icon">📄</span>
+                    下載問卷副本 (PDF)
+                </button>
+                <div class="completion-info">
+                    <p>📧 報告生成後，AI 總監會主動聯繫你</p>
+                    <p>💡 如有疑問，請聯繫 HR 或管理員</p>
                 </div>
-                <button class="copy-btn" onclick="copyResult()">複製數據</button>
+                <p style="color:var(--gray);font-size:13px;margin-top:40px">你現在可以關閉此頁面</p>
             </div>
         </div>
     </main>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script>
         const WEBHOOK_URL = 'https://n8n.maxai-lab.com/webhook/employee-survey';
         let currentSection = 0;
         const totalSections = 10;
         const answers = {};
         const multiAnswers = {};
+        let submittedData = null;
 
         document.getElementById('totalSections').textContent = totalSections;
 
@@ -815,6 +826,7 @@
                 submittedAt: new Date().toISOString(),
                 version: '1.0'
             };
+            submittedData = data;
             document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
             document.getElementById('loadingScreen').classList.add('show');
             try {
@@ -829,25 +841,187 @@
             setTimeout(() => {
                 document.getElementById('loadingScreen').classList.remove('show');
                 document.getElementById('completionScreen').classList.add('active');
-                document.getElementById('resultJson').textContent = JSON.stringify(data, null, 2);
                 document.getElementById('currentSection').textContent = '✓';
                 document.getElementById('progressBar').style.width = '100%';
             }, 1500);
         }
 
-        function copyResult() {
-            const text = document.getElementById('resultJson').textContent;
-            navigator.clipboard.writeText(text).then(() => {
-                const btn = document.querySelector('.copy-btn');
-                btn.textContent = '已複製！';
-                btn.style.background = 'var(--gold)';
-                btn.style.color = 'var(--black)';
-                setTimeout(() => {
-                    btn.textContent = '複製數據';
-                    btn.style.background = '';
-                    btn.style.color = '';
-                }, 2000);
+        function downloadPDF() {
+            if (!submittedData) return;
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('p', 'mm', 'a4');
+            const pageWidth = 210;
+            const pageHeight = 297;
+            const margin = 20;
+            const contentWidth = pageWidth - margin * 2;
+            let y = 0;
+
+            // 背景色
+            doc.setFillColor(26, 26, 26);
+            doc.rect(0, 0, pageWidth, pageHeight, 'F');
+
+            // 頂部金色裝飾線
+            doc.setFillColor(201, 169, 98);
+            doc.rect(0, 0, pageWidth, 4, 'F');
+
+            // Logo 區域
+            y = 25;
+            doc.setFillColor(201, 169, 98);
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(28);
+            doc.setTextColor(201, 169, 98);
+            doc.text('MAX AI', pageWidth / 2, y, { align: 'center' });
+
+            // 標題
+            y += 15;
+            doc.setFontSize(18);
+            doc.setTextColor(255, 255, 255);
+            doc.text('員工畫像問卷', pageWidth / 2, y, { align: 'center' });
+
+            // 副標題
+            y += 8;
+            doc.setFontSize(10);
+            doc.setTextColor(170, 170, 170);
+            doc.text('Employee Profile Questionnaire', pageWidth / 2, y, { align: 'center' });
+
+            // 分隔線
+            y += 10;
+            doc.setDrawColor(201, 169, 98);
+            doc.setLineWidth(0.5);
+            doc.line(margin, y, pageWidth - margin, y);
+
+            // 基本資料區塊
+            y += 15;
+            doc.setFillColor(45, 45, 45);
+            doc.roundedRect(margin, y - 5, contentWidth, 50, 3, 3, 'F');
+            doc.setFontSize(12);
+            doc.setTextColor(201, 169, 98);
+            doc.text('基本資料', margin + 5, y + 3);
+
+            y += 12;
+            doc.setFontSize(10);
+            doc.setTextColor(200, 200, 200);
+            const d = submittedData;
+            const basicInfo = [
+                ['姓名', d.name || '-', '性別', d.gender || '-'],
+                ['年齡', d.age || '-', '所在地', d.city || '-'],
+                ['職位', d.position || '-', '學歷', d.education || '-']
+            ];
+            basicInfo.forEach((row, i) => {
+                doc.setTextColor(170, 170, 170);
+                doc.text(row[0] + ':', margin + 8, y + i * 10);
+                doc.setTextColor(255, 255, 255);
+                doc.text(row[1], margin + 28, y + i * 10);
+                doc.setTextColor(170, 170, 170);
+                doc.text(row[2] + ':', margin + 85, y + i * 10);
+                doc.setTextColor(255, 255, 255);
+                doc.text(row[3], margin + 105, y + i * 10);
             });
+
+            // MBTI 區塊
+            y += 45;
+            doc.setFillColor(45, 45, 45);
+            doc.roundedRect(margin, y - 5, contentWidth, 25, 3, 3, 'F');
+            doc.setFontSize(12);
+            doc.setTextColor(201, 169, 98);
+            doc.text('MBTI 性格類型', margin + 5, y + 3);
+
+            y += 12;
+            doc.setFontSize(20);
+            doc.setTextColor(201, 169, 98);
+            doc.text(d.mbtiCalculated || d.mbtiType || '-', margin + 8, y + 3);
+            doc.setFontSize(9);
+            doc.setTextColor(170, 170, 170);
+            const mbtiLabels = { 'E': '外向', 'I': '內向', 'S': '感知', 'N': '直覺', 'T': '思考', 'F': '情感', 'J': '判斷', 'P': '感知' };
+            const mbti = d.mbtiCalculated || d.mbtiType || 'INTJ';
+            const mbtiDesc = mbti.split('').map(c => mbtiLabels[c] || c).join(' · ');
+            doc.text(mbtiDesc, margin + 45, y + 1);
+
+            // 工作風格區塊
+            y += 25;
+            doc.setFillColor(45, 45, 45);
+            doc.roundedRect(margin, y - 5, contentWidth, 40, 3, 3, 'F');
+            doc.setFontSize(12);
+            doc.setTextColor(201, 169, 98);
+            doc.text('工作風格', margin + 5, y + 3);
+
+            y += 12;
+            doc.setFontSize(9);
+            const workStyle = [
+                ['壓力應對', d.stress || '-'],
+                ['工作節奏', d.pace || '-'],
+                ['工作模式', d.workMode || '-'],
+                ['溝通方式', d.commChannel || '-']
+            ];
+            workStyle.forEach((item, i) => {
+                const col = i % 2;
+                const row = Math.floor(i / 2);
+                doc.setTextColor(170, 170, 170);
+                doc.text(item[0] + ':', margin + 8 + col * 85, y + row * 10);
+                doc.setTextColor(255, 255, 255);
+                doc.text(item[1], margin + 35 + col * 85, y + row * 10);
+            });
+
+            // 技能與能力區塊
+            y += 35;
+            doc.setFillColor(45, 45, 45);
+            doc.roundedRect(margin, y - 5, contentWidth, 30, 3, 3, 'F');
+            doc.setFontSize(12);
+            doc.setTextColor(201, 169, 98);
+            doc.text('技能與能力', margin + 5, y + 3);
+
+            y += 12;
+            doc.setFontSize(9);
+            doc.setTextColor(170, 170, 170);
+            doc.text('語言能力:', margin + 8, y);
+            doc.setTextColor(255, 255, 255);
+            doc.text(Array.isArray(d.languages) ? d.languages.join(', ') : (d.languages || '-'), margin + 35, y);
+
+            doc.setTextColor(170, 170, 170);
+            doc.text('核心能力:', margin + 8, y + 10);
+            doc.setTextColor(255, 255, 255);
+            const abilities = Array.isArray(d.abilities) ? d.abilities.join(', ') : (d.abilities || '-');
+            doc.text(abilities.substring(0, 50), margin + 35, y + 10);
+
+            // 發展規劃區塊
+            y += 35;
+            doc.setFillColor(45, 45, 45);
+            doc.roundedRect(margin, y - 5, contentWidth, 30, 3, 3, 'F');
+            doc.setFontSize(12);
+            doc.setTextColor(201, 169, 98);
+            doc.text('發展規劃', margin + 5, y + 3);
+
+            y += 12;
+            doc.setFontSize(9);
+            doc.setTextColor(170, 170, 170);
+            doc.text('1年目標:', margin + 8, y);
+            doc.setTextColor(255, 255, 255);
+            doc.text(Array.isArray(d.oneYearGoal) ? d.oneYearGoal.join(', ') : (d.oneYearGoal || '-'), margin + 35, y);
+
+            doc.setTextColor(170, 170, 170);
+            doc.text('3年規劃:', margin + 8, y + 10);
+            doc.setTextColor(255, 255, 255);
+            doc.text(d.threeYearPlan || '-', margin + 35, y + 10);
+
+            // 底部
+            y = pageHeight - 30;
+            doc.setDrawColor(201, 169, 98);
+            doc.setLineWidth(0.3);
+            doc.line(margin, y, pageWidth - margin, y);
+
+            y += 8;
+            doc.setFontSize(8);
+            doc.setTextColor(136, 136, 136);
+            doc.text('提交時間: ' + new Date(d.submittedAt).toLocaleString('zh-TW'), margin, y);
+            doc.text('MAX AI Employee Profile System', pageWidth - margin, y, { align: 'right' });
+
+            // 底部金色裝飾線
+            doc.setFillColor(201, 169, 98);
+            doc.rect(0, pageHeight - 4, pageWidth, 4, 'F');
+
+            // 下載
+            const fileName = (d.name || 'employee') + '_問卷副本_' + new Date().toISOString().split('T')[0] + '.pdf';
+            doc.save(fileName);
         }
     </script>
 </body>
