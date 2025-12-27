@@ -761,54 +761,54 @@
         <!-- PDF Template (Hidden) -->
         <div id="pdfTemplate" style="position:absolute;left:-9999px;top:0;width:800px;background:#1A1A1A;font-family:'Noto Sans TC',sans-serif;">
             <div style="padding:40px;color:#fff;">
-                <!-- Header -->
+                <!-- Header with Logo Image -->
                 <div style="border-bottom:4px solid #C9A962;padding-bottom:30px;margin-bottom:30px;text-align:center;">
-                    <div style="font-size:36px;font-weight:900;color:#C9A962;letter-spacing:4px;margin-bottom:10px;">MAX AI</div>
-                    <div style="font-size:24px;font-weight:700;color:#fff;margin-bottom:5px;">員工畫像問卷</div>
+                    <img src="logo-text.png" alt="MAX AI" style="height:50px;margin-bottom:15px;">
+                    <div style="font-size:22px;font-weight:700;color:#fff;margin-bottom:5px;">員工畫像問卷</div>
                     <div style="font-size:12px;color:#888;">Employee Profile Questionnaire</div>
                 </div>
 
                 <!-- Basic Info -->
-                <div style="background:#2D2D2D;border-radius:12px;padding:25px;margin-bottom:20px;">
-                    <div style="font-size:16px;color:#C9A962;font-weight:700;margin-bottom:20px;border-bottom:1px solid #3D3D3D;padding-bottom:10px;">📋 基本資料</div>
-                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:15px;" id="pdfBasicInfo"></div>
+                <div style="background:#2D2D2D;border-radius:12px;padding:20px 25px;margin-bottom:15px;">
+                    <div style="font-size:14px;color:#C9A962;font-weight:700;margin-bottom:15px;border-bottom:1px solid #3D3D3D;padding-bottom:8px;">📋 基本資料</div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;font-size:13px;" id="pdfBasicInfo"></div>
                 </div>
 
                 <!-- MBTI -->
-                <div style="background:#2D2D2D;border-radius:12px;padding:25px;margin-bottom:20px;">
-                    <div style="font-size:16px;color:#C9A962;font-weight:700;margin-bottom:15px;border-bottom:1px solid #3D3D3D;padding-bottom:10px;">🧠 MBTI 性格類型</div>
+                <div style="background:#2D2D2D;border-radius:12px;padding:20px 25px;margin-bottom:15px;">
+                    <div style="font-size:14px;color:#C9A962;font-weight:700;margin-bottom:12px;border-bottom:1px solid #3D3D3D;padding-bottom:8px;">🧠 MBTI 性格類型</div>
                     <div style="display:flex;align-items:center;gap:20px;">
-                        <div style="font-size:42px;font-weight:900;color:#C9A962;" id="pdfMBTI">INTJ</div>
-                        <div style="font-size:14px;color:#AAA;" id="pdfMBTIDesc"></div>
+                        <div style="font-size:36px;font-weight:900;color:#C9A962;" id="pdfMBTI">INTJ</div>
+                        <div style="font-size:13px;color:#AAA;" id="pdfMBTIDesc"></div>
                     </div>
                 </div>
 
                 <!-- Work Style -->
-                <div style="background:#2D2D2D;border-radius:12px;padding:25px;margin-bottom:20px;">
-                    <div style="font-size:16px;color:#C9A962;font-weight:700;margin-bottom:20px;border-bottom:1px solid #3D3D3D;padding-bottom:10px;">💼 工作風格</div>
-                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:15px;" id="pdfWorkStyle"></div>
+                <div style="background:#2D2D2D;border-radius:12px;padding:20px 25px;margin-bottom:15px;">
+                    <div style="font-size:14px;color:#C9A962;font-weight:700;margin-bottom:15px;border-bottom:1px solid #3D3D3D;padding-bottom:8px;">💼 工作風格</div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;font-size:13px;" id="pdfWorkStyle"></div>
                 </div>
 
                 <!-- Skills -->
-                <div style="background:#2D2D2D;border-radius:12px;padding:25px;margin-bottom:20px;">
-                    <div style="font-size:16px;color:#C9A962;font-weight:700;margin-bottom:20px;border-bottom:1px solid #3D3D3D;padding-bottom:10px;">🎯 技能與能力</div>
-                    <div id="pdfSkills"></div>
+                <div style="background:#2D2D2D;border-radius:12px;padding:20px 25px;margin-bottom:15px;">
+                    <div style="font-size:14px;color:#C9A962;font-weight:700;margin-bottom:15px;border-bottom:1px solid #3D3D3D;padding-bottom:8px;">🎯 技能與能力</div>
+                    <div style="font-size:13px;" id="pdfSkills"></div>
                 </div>
 
                 <!-- Goals -->
-                <div style="background:#2D2D2D;border-radius:12px;padding:25px;margin-bottom:20px;">
-                    <div style="font-size:16px;color:#C9A962;font-weight:700;margin-bottom:20px;border-bottom:1px solid #3D3D3D;padding-bottom:10px;">📈 發展規劃</div>
-                    <div id="pdfGoals"></div>
+                <div style="background:#2D2D2D;border-radius:12px;padding:20px 25px;margin-bottom:15px;">
+                    <div style="font-size:14px;color:#C9A962;font-weight:700;margin-bottom:15px;border-bottom:1px solid #3D3D3D;padding-bottom:8px;">📈 發展規劃</div>
+                    <div style="font-size:13px;" id="pdfGoals"></div>
                 </div>
 
                 <!-- Footer -->
-                <div style="border-top:1px solid #3D3D3D;padding-top:20px;margin-top:30px;display:flex;justify-content:space-between;font-size:11px;color:#666;">
+                <div style="border-top:1px solid #3D3D3D;padding-top:15px;margin-top:20px;display:flex;justify-content:space-between;font-size:10px;color:#666;">
                     <div id="pdfTime"></div>
                     <div>MAX AI Employee Profile System</div>
                 </div>
 
                 <!-- Bottom Bar -->
-                <div style="height:4px;background:#C9A962;margin-top:20px;border-radius:2px;"></div>
+                <div style="height:4px;background:#C9A962;margin-top:15px;border-radius:2px;"></div>
             </div>
         </div>
     </main>
@@ -926,23 +926,31 @@
         }
 
         function createInfoItem(label, value) {
-            return `<div style="display:flex;gap:10px;"><span style="color:#888;min-width:80px;">${label}:</span><span style="color:#fff;">${value || '-'}</span></div>`;
+            return `<div style="display:flex;gap:8px;padding:4px 0;"><span style="color:#888;min-width:70px;font-size:12px;">${label}:</span><span style="color:#fff;font-size:12px;">${value || '-'}</span></div>`;
+        }
+
+        function createInfoRow(label, value) {
+            return `<div style="display:flex;gap:8px;padding:6px 0;border-bottom:1px solid #3D3D3D;"><span style="color:#888;min-width:70px;font-size:12px;">${label}:</span><span style="color:#fff;font-size:12px;flex:1;">${value || '-'}</span></div>`;
         }
 
         async function downloadPDF() {
             if (!submittedData) return;
             const d = submittedData;
             
-            // 填充 PDF 模板
+            // 填充 PDF 模板 - 基本資料（兩列佈局）
             document.getElementById('pdfBasicInfo').innerHTML = `
-                ${createInfoItem('姓名', d.name)}
-                ${createInfoItem('性別', d.gender)}
-                ${createInfoItem('年齡', d.age)}
-                ${createInfoItem('所在地', d.city)}
-                ${createInfoItem('職位', d.position)}
-                ${createInfoItem('學歷', d.education)}
-                ${createInfoItem('專業', Array.isArray(d.major) ? d.major.join(', ') : d.major)}
-                ${createInfoItem('工作經驗', d.experience)}
+                <div>
+                    ${createInfoRow('姓名', d.name)}
+                    ${createInfoRow('年齡', d.age)}
+                    ${createInfoRow('職位', d.position)}
+                    ${createInfoRow('專業', Array.isArray(d.major) ? d.major.join(', ') : d.major)}
+                </div>
+                <div>
+                    ${createInfoRow('性別', d.gender)}
+                    ${createInfoRow('所在地', d.city)}
+                    ${createInfoRow('學歷', d.education)}
+                    ${createInfoRow('工作經驗', d.experience)}
+                </div>
             `;
 
             const mbti = d.mbtiCalculated || d.mbtiType || 'INTJ';
@@ -951,25 +959,32 @@
             document.getElementById('pdfMBTI').textContent = mbti;
             document.getElementById('pdfMBTIDesc').textContent = mbtiDesc;
 
+            // 工作風格（兩列佈局）
             document.getElementById('pdfWorkStyle').innerHTML = `
-                ${createInfoItem('壓力應對', d.stress)}
-                ${createInfoItem('工作節奏', d.pace)}
-                ${createInfoItem('工作模式', d.workMode)}
-                ${createInfoItem('溝通方式', d.commChannel)}
-                ${createInfoItem('截止日期', d.deadline)}
-                ${createInfoItem('學習態度', d.learning)}
+                <div>
+                    ${createInfoRow('壓力應對', d.stress)}
+                    ${createInfoRow('工作模式', d.workMode)}
+                    ${createInfoRow('截止日期', d.deadline)}
+                </div>
+                <div>
+                    ${createInfoRow('工作節奏', d.pace)}
+                    ${createInfoRow('溝通方式', d.commChannel)}
+                    ${createInfoRow('學習態度', d.learning)}
+                </div>
             `;
 
+            // 技能與能力
             document.getElementById('pdfSkills').innerHTML = `
-                ${createInfoItem('語言能力', Array.isArray(d.languages) ? d.languages.join(', ') : d.languages)}
-                ${createInfoItem('技術技能', Array.isArray(d.techSkills) ? d.techSkills.join(', ') : d.techSkills)}
-                ${createInfoItem('核心能力', Array.isArray(d.abilities) ? d.abilities.join(', ') : d.abilities)}
+                ${createInfoRow('語言能力', Array.isArray(d.languages) ? d.languages.join(', ') : d.languages)}
+                ${createInfoRow('技術技能', Array.isArray(d.techSkills) ? d.techSkills.join(', ') : d.techSkills)}
+                ${createInfoRow('核心能力', Array.isArray(d.abilities) ? d.abilities.join(', ') : d.abilities)}
             `;
 
+            // 發展規劃
             document.getElementById('pdfGoals').innerHTML = `
-                ${createInfoItem('1年目標', Array.isArray(d.oneYearGoal) ? d.oneYearGoal.join(', ') : d.oneYearGoal)}
-                ${createInfoItem('3年規劃', d.threeYearPlan)}
-                ${createInfoItem('重視價值', Array.isArray(d.values) ? d.values.join(', ') : d.values)}
+                ${createInfoRow('1年目標', Array.isArray(d.oneYearGoal) ? d.oneYearGoal.join(', ') : d.oneYearGoal)}
+                ${createInfoRow('3年規劃', d.threeYearPlan)}
+                ${createInfoRow('重視價值', Array.isArray(d.values) ? d.values.join(', ') : d.values)}
             `;
 
             document.getElementById('pdfTime').textContent = '提交時間: ' + new Date(d.submittedAt).toLocaleString('zh-TW');
