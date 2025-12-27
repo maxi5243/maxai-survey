@@ -733,9 +733,64 @@
                 <p style="color:var(--gray);font-size:13px;margin-top:40px">你現在可以關閉此頁面</p>
             </div>
         </div>
+
+        <!-- PDF Template (Hidden) -->
+        <div id="pdfTemplate" style="position:absolute;left:-9999px;top:0;width:800px;background:#1A1A1A;font-family:'Noto Sans TC',sans-serif;">
+            <div style="padding:40px;color:#fff;">
+                <!-- Header -->
+                <div style="border-bottom:4px solid #C9A962;padding-bottom:30px;margin-bottom:30px;text-align:center;">
+                    <div style="font-size:36px;font-weight:900;color:#C9A962;letter-spacing:4px;margin-bottom:10px;">MAX AI</div>
+                    <div style="font-size:24px;font-weight:700;color:#fff;margin-bottom:5px;">員工畫像問卷</div>
+                    <div style="font-size:12px;color:#888;">Employee Profile Questionnaire</div>
+                </div>
+
+                <!-- Basic Info -->
+                <div style="background:#2D2D2D;border-radius:12px;padding:25px;margin-bottom:20px;">
+                    <div style="font-size:16px;color:#C9A962;font-weight:700;margin-bottom:20px;border-bottom:1px solid #3D3D3D;padding-bottom:10px;">📋 基本資料</div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:15px;" id="pdfBasicInfo"></div>
+                </div>
+
+                <!-- MBTI -->
+                <div style="background:#2D2D2D;border-radius:12px;padding:25px;margin-bottom:20px;">
+                    <div style="font-size:16px;color:#C9A962;font-weight:700;margin-bottom:15px;border-bottom:1px solid #3D3D3D;padding-bottom:10px;">🧠 MBTI 性格類型</div>
+                    <div style="display:flex;align-items:center;gap:20px;">
+                        <div style="font-size:42px;font-weight:900;color:#C9A962;" id="pdfMBTI">INTJ</div>
+                        <div style="font-size:14px;color:#AAA;" id="pdfMBTIDesc"></div>
+                    </div>
+                </div>
+
+                <!-- Work Style -->
+                <div style="background:#2D2D2D;border-radius:12px;padding:25px;margin-bottom:20px;">
+                    <div style="font-size:16px;color:#C9A962;font-weight:700;margin-bottom:20px;border-bottom:1px solid #3D3D3D;padding-bottom:10px;">💼 工作風格</div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:15px;" id="pdfWorkStyle"></div>
+                </div>
+
+                <!-- Skills -->
+                <div style="background:#2D2D2D;border-radius:12px;padding:25px;margin-bottom:20px;">
+                    <div style="font-size:16px;color:#C9A962;font-weight:700;margin-bottom:20px;border-bottom:1px solid #3D3D3D;padding-bottom:10px;">🎯 技能與能力</div>
+                    <div id="pdfSkills"></div>
+                </div>
+
+                <!-- Goals -->
+                <div style="background:#2D2D2D;border-radius:12px;padding:25px;margin-bottom:20px;">
+                    <div style="font-size:16px;color:#C9A962;font-weight:700;margin-bottom:20px;border-bottom:1px solid #3D3D3D;padding-bottom:10px;">📈 發展規劃</div>
+                    <div id="pdfGoals"></div>
+                </div>
+
+                <!-- Footer -->
+                <div style="border-top:1px solid #3D3D3D;padding-top:20px;margin-top:30px;display:flex;justify-content:space-between;font-size:11px;color:#666;">
+                    <div id="pdfTime"></div>
+                    <div>MAX AI Employee Profile System</div>
+                </div>
+
+                <!-- Bottom Bar -->
+                <div style="height:4px;background:#C9A962;margin-top:20px;border-radius:2px;"></div>
+            </div>
+        </div>
     </main>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script>
         const WEBHOOK_URL = 'https://n8n.maxai-lab.com/webhook/employee-survey';
         let currentSection = 0;
@@ -846,182 +901,85 @@
             }, 1500);
         }
 
-        function downloadPDF() {
+        function createInfoItem(label, value) {
+            return `<div style="display:flex;gap:10px;"><span style="color:#888;min-width:80px;">${label}:</span><span style="color:#fff;">${value || '-'}</span></div>`;
+        }
+
+        async function downloadPDF() {
             if (!submittedData) return;
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF('p', 'mm', 'a4');
-            const pageWidth = 210;
-            const pageHeight = 297;
-            const margin = 20;
-            const contentWidth = pageWidth - margin * 2;
-            let y = 0;
-
-            // 背景色
-            doc.setFillColor(26, 26, 26);
-            doc.rect(0, 0, pageWidth, pageHeight, 'F');
-
-            // 頂部金色裝飾線
-            doc.setFillColor(201, 169, 98);
-            doc.rect(0, 0, pageWidth, 4, 'F');
-
-            // Logo 區域
-            y = 25;
-            doc.setFillColor(201, 169, 98);
-            doc.setFont('helvetica', 'bold');
-            doc.setFontSize(28);
-            doc.setTextColor(201, 169, 98);
-            doc.text('MAX AI', pageWidth / 2, y, { align: 'center' });
-
-            // 標題
-            y += 15;
-            doc.setFontSize(18);
-            doc.setTextColor(255, 255, 255);
-            doc.text('員工畫像問卷', pageWidth / 2, y, { align: 'center' });
-
-            // 副標題
-            y += 8;
-            doc.setFontSize(10);
-            doc.setTextColor(170, 170, 170);
-            doc.text('Employee Profile Questionnaire', pageWidth / 2, y, { align: 'center' });
-
-            // 分隔線
-            y += 10;
-            doc.setDrawColor(201, 169, 98);
-            doc.setLineWidth(0.5);
-            doc.line(margin, y, pageWidth - margin, y);
-
-            // 基本資料區塊
-            y += 15;
-            doc.setFillColor(45, 45, 45);
-            doc.roundedRect(margin, y - 5, contentWidth, 50, 3, 3, 'F');
-            doc.setFontSize(12);
-            doc.setTextColor(201, 169, 98);
-            doc.text('基本資料', margin + 5, y + 3);
-
-            y += 12;
-            doc.setFontSize(10);
-            doc.setTextColor(200, 200, 200);
             const d = submittedData;
-            const basicInfo = [
-                ['姓名', d.name || '-', '性別', d.gender || '-'],
-                ['年齡', d.age || '-', '所在地', d.city || '-'],
-                ['職位', d.position || '-', '學歷', d.education || '-']
-            ];
-            basicInfo.forEach((row, i) => {
-                doc.setTextColor(170, 170, 170);
-                doc.text(row[0] + ':', margin + 8, y + i * 10);
-                doc.setTextColor(255, 255, 255);
-                doc.text(row[1], margin + 28, y + i * 10);
-                doc.setTextColor(170, 170, 170);
-                doc.text(row[2] + ':', margin + 85, y + i * 10);
-                doc.setTextColor(255, 255, 255);
-                doc.text(row[3], margin + 105, y + i * 10);
-            });
+            
+            // 填充 PDF 模板
+            document.getElementById('pdfBasicInfo').innerHTML = `
+                ${createInfoItem('姓名', d.name)}
+                ${createInfoItem('性別', d.gender)}
+                ${createInfoItem('年齡', d.age)}
+                ${createInfoItem('所在地', d.city)}
+                ${createInfoItem('職位', d.position)}
+                ${createInfoItem('學歷', d.education)}
+                ${createInfoItem('專業', Array.isArray(d.major) ? d.major.join(', ') : d.major)}
+                ${createInfoItem('工作經驗', d.experience)}
+            `;
 
-            // MBTI 區塊
-            y += 45;
-            doc.setFillColor(45, 45, 45);
-            doc.roundedRect(margin, y - 5, contentWidth, 25, 3, 3, 'F');
-            doc.setFontSize(12);
-            doc.setTextColor(201, 169, 98);
-            doc.text('MBTI 性格類型', margin + 5, y + 3);
-
-            y += 12;
-            doc.setFontSize(20);
-            doc.setTextColor(201, 169, 98);
-            doc.text(d.mbtiCalculated || d.mbtiType || '-', margin + 8, y + 3);
-            doc.setFontSize(9);
-            doc.setTextColor(170, 170, 170);
-            const mbtiLabels = { 'E': '外向', 'I': '內向', 'S': '感知', 'N': '直覺', 'T': '思考', 'F': '情感', 'J': '判斷', 'P': '感知' };
             const mbti = d.mbtiCalculated || d.mbtiType || 'INTJ';
+            const mbtiLabels = {'E':'外向','I':'內向','S':'感知','N':'直覺','T':'思考','F':'情感','J':'判斷','P':'感知'};
             const mbtiDesc = mbti.split('').map(c => mbtiLabels[c] || c).join(' · ');
-            doc.text(mbtiDesc, margin + 45, y + 1);
+            document.getElementById('pdfMBTI').textContent = mbti;
+            document.getElementById('pdfMBTIDesc').textContent = mbtiDesc;
 
-            // 工作風格區塊
-            y += 25;
-            doc.setFillColor(45, 45, 45);
-            doc.roundedRect(margin, y - 5, contentWidth, 40, 3, 3, 'F');
-            doc.setFontSize(12);
-            doc.setTextColor(201, 169, 98);
-            doc.text('工作風格', margin + 5, y + 3);
+            document.getElementById('pdfWorkStyle').innerHTML = `
+                ${createInfoItem('壓力應對', d.stress)}
+                ${createInfoItem('工作節奏', d.pace)}
+                ${createInfoItem('工作模式', d.workMode)}
+                ${createInfoItem('溝通方式', d.commChannel)}
+                ${createInfoItem('截止日期', d.deadline)}
+                ${createInfoItem('學習態度', d.learning)}
+            `;
 
-            y += 12;
-            doc.setFontSize(9);
-            const workStyle = [
-                ['壓力應對', d.stress || '-'],
-                ['工作節奏', d.pace || '-'],
-                ['工作模式', d.workMode || '-'],
-                ['溝通方式', d.commChannel || '-']
-            ];
-            workStyle.forEach((item, i) => {
-                const col = i % 2;
-                const row = Math.floor(i / 2);
-                doc.setTextColor(170, 170, 170);
-                doc.text(item[0] + ':', margin + 8 + col * 85, y + row * 10);
-                doc.setTextColor(255, 255, 255);
-                doc.text(item[1], margin + 35 + col * 85, y + row * 10);
-            });
+            document.getElementById('pdfSkills').innerHTML = `
+                ${createInfoItem('語言能力', Array.isArray(d.languages) ? d.languages.join(', ') : d.languages)}
+                ${createInfoItem('技術技能', Array.isArray(d.techSkills) ? d.techSkills.join(', ') : d.techSkills)}
+                ${createInfoItem('核心能力', Array.isArray(d.abilities) ? d.abilities.join(', ') : d.abilities)}
+            `;
 
-            // 技能與能力區塊
-            y += 35;
-            doc.setFillColor(45, 45, 45);
-            doc.roundedRect(margin, y - 5, contentWidth, 30, 3, 3, 'F');
-            doc.setFontSize(12);
-            doc.setTextColor(201, 169, 98);
-            doc.text('技能與能力', margin + 5, y + 3);
+            document.getElementById('pdfGoals').innerHTML = `
+                ${createInfoItem('1年目標', Array.isArray(d.oneYearGoal) ? d.oneYearGoal.join(', ') : d.oneYearGoal)}
+                ${createInfoItem('3年規劃', d.threeYearPlan)}
+                ${createInfoItem('重視價值', Array.isArray(d.values) ? d.values.join(', ') : d.values)}
+            `;
 
-            y += 12;
-            doc.setFontSize(9);
-            doc.setTextColor(170, 170, 170);
-            doc.text('語言能力:', margin + 8, y);
-            doc.setTextColor(255, 255, 255);
-            doc.text(Array.isArray(d.languages) ? d.languages.join(', ') : (d.languages || '-'), margin + 35, y);
+            document.getElementById('pdfTime').textContent = '提交時間: ' + new Date(d.submittedAt).toLocaleString('zh-TW');
 
-            doc.setTextColor(170, 170, 170);
-            doc.text('核心能力:', margin + 8, y + 10);
-            doc.setTextColor(255, 255, 255);
-            const abilities = Array.isArray(d.abilities) ? d.abilities.join(', ') : (d.abilities || '-');
-            doc.text(abilities.substring(0, 50), margin + 35, y + 10);
+            // 生成 PDF
+            const template = document.getElementById('pdfTemplate');
+            template.style.left = '0';
+            template.style.position = 'fixed';
+            template.style.zIndex = '-1';
 
-            // 發展規劃區塊
-            y += 35;
-            doc.setFillColor(45, 45, 45);
-            doc.roundedRect(margin, y - 5, contentWidth, 30, 3, 3, 'F');
-            doc.setFontSize(12);
-            doc.setTextColor(201, 169, 98);
-            doc.text('發展規劃', margin + 5, y + 3);
+            try {
+                const canvas = await html2canvas(template, {
+                    scale: 2,
+                    backgroundColor: '#1A1A1A',
+                    useCORS: true
+                });
 
-            y += 12;
-            doc.setFontSize(9);
-            doc.setTextColor(170, 170, 170);
-            doc.text('1年目標:', margin + 8, y);
-            doc.setTextColor(255, 255, 255);
-            doc.text(Array.isArray(d.oneYearGoal) ? d.oneYearGoal.join(', ') : (d.oneYearGoal || '-'), margin + 35, y);
+                const { jsPDF } = window.jspdf;
+                const imgWidth = 210;
+                const imgHeight = (canvas.height * imgWidth) / canvas.width;
+                
+                const pdf = new jsPDF('p', 'mm', 'a4');
+                const imgData = canvas.toDataURL('image/png');
+                pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+                
+                const fileName = (d.name || 'employee') + '_問卷副本_' + new Date().toISOString().split('T')[0] + '.pdf';
+                pdf.save(fileName);
+            } catch (e) {
+                console.error('PDF generation error:', e);
+                alert('PDF 生成失敗，請稍後再試');
+            }
 
-            doc.setTextColor(170, 170, 170);
-            doc.text('3年規劃:', margin + 8, y + 10);
-            doc.setTextColor(255, 255, 255);
-            doc.text(d.threeYearPlan || '-', margin + 35, y + 10);
-
-            // 底部
-            y = pageHeight - 30;
-            doc.setDrawColor(201, 169, 98);
-            doc.setLineWidth(0.3);
-            doc.line(margin, y, pageWidth - margin, y);
-
-            y += 8;
-            doc.setFontSize(8);
-            doc.setTextColor(136, 136, 136);
-            doc.text('提交時間: ' + new Date(d.submittedAt).toLocaleString('zh-TW'), margin, y);
-            doc.text('MAX AI Employee Profile System', pageWidth - margin, y, { align: 'right' });
-
-            // 底部金色裝飾線
-            doc.setFillColor(201, 169, 98);
-            doc.rect(0, pageHeight - 4, pageWidth, 4, 'F');
-
-            // 下載
-            const fileName = (d.name || 'employee') + '_問卷副本_' + new Date().toISOString().split('T')[0] + '.pdf';
-            doc.save(fileName);
+            template.style.left = '-9999px';
+            template.style.position = 'absolute';
         }
     </script>
 </body>
